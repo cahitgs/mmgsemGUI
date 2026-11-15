@@ -1,0 +1,4 @@
+^tests/testthat/_snaps$
+^\.Rproj\.user$
+^.*\.Rproj$
+^data-raw$

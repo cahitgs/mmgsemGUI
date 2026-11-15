@@ -1,0 +1,19 @@
+# Only the application and the scripts that build its installer are tracked.
+/*
+!/.gitignore
+!/README.md
+!/LICENSE
+!/docs/
+!/mmgsemGUI/
+!/installer/
+
+# Produced by the installer build
+/installer/staging/
+/installer/output/
+
+# R and editor leftovers
+*.log
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj

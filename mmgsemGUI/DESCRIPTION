@@ -1,0 +1,41 @@
+Package: mmgsemGUI
+Title: A Point-and-Click Interface for Mixture Multigroup Structural Equation Modeling
+Version: 0.1.0
+Authors@R:
+    person("Package", "Maintainer", role = c("aut", "cre"),
+           email = "maintainer@example.org")
+Description: A graphical user interface for the 'mmgsem' package (Perez Alonso,
+    Vermunt, Rosseel, Zhao & De Roover, 2026, <doi:10.1080/10705511.2026.2617170>).
+    It guides the user through a Mixture Multigroup SEM analysis: loading the
+    data, estimating the measurement model, defining the structural model,
+    choosing the number of clusters, inspecting the clusters and testing
+    hypotheses. Every analysis can be exported as a reproducible R script.
+    All estimation is done by 'mmgsem' and 'lavaan'; this package only adds
+    the interface, background execution, diagnostics and graphics.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Depends:
+    R (>= 4.1)
+Imports:
+    bslib,
+    callr,
+    ggplot2,
+    grid,
+    htmltools,
+    later,
+    lavaan,
+    mmgsem,
+    methods,
+    parallel,
+    semTools,
+    shiny,
+    stats,
+    utils
+Suggests:
+    haven,
+    readxl,
+    testthat (>= 3.0.0)
+Remotes:
+    AndresFPA/mmgsem@758e845ced26393b7dd9d3627e61dd8a05a72428
+Config/testthat/edition: 3
+Roxygen: list(markdown = TRUE)
