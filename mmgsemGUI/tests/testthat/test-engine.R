@@ -73,15 +73,13 @@ test_that("the exported script is valid R and follows the analysis", {
   expect_match(early, 'read.csv2("my data.csv")', fixed = TRUE)
 })
 
-test_that("every interface text exists in both languages with the same placeholders", {
+test_that("every interface text is one string, and placeholders are filled in", {
   d <- mmgsemGUI:::dict
-  expect_true(all(vapply(d, function(x) setequal(names(x), c("en", "tr")), logical(1))))
-  holders <- function(x) sort(unlist(regmatches(x, gregexpr("%[sd]", x))))
-  same <- vapply(d, function(x) identical(holders(x[["en"]]), holders(x[["tr"]])), logical(1))
-  expect_identical(names(d)[!same], character())
-  L <- mmgsemGUI:::translator("tr")
-  expect_identical(L("n_clusters", 4L), "4 küme")
-  expect_identical(mmgsemGUI:::translator("en")("no_such_key"), "no_such_key")
+  expect_true(all(vapply(d, function(x) is.character(x) && length(x) == 1L && nzchar(x), logical(1))))
+  expect_identical(names(d)[duplicated(names(d))], character())
+  L <- mmgsemGUI:::translator()
+  expect_identical(L("n_clusters", 4L), "4 clusters")
+  expect_identical(L("no_such_key"), "no_such_key")
 })
 
 test_that("a small analysis runs end to end and agrees with mmgsem called directly", {

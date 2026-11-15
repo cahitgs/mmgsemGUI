@@ -21,8 +21,7 @@ guess_group <- function(df) {
 }
 
 app_server <- function(input, output, session) {
-  lang <- pick_lang(parseQueryString(isolate(session$clientData$url_search) %||% "")$lang)
-  L <- translator(lang)
+  L <- translator()
   cw <- L("cluster")
   track_session(session)
 

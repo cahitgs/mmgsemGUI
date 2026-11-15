@@ -31,7 +31,6 @@ InfoAfterFile=staging\LICENSES.txt
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
-Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 
 [Tasks]
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"
@@ -43,25 +42,14 @@ Source: "staging\*"; DestDir: "{app}"; Flags: recursesubdirs createallsubdirs ig
 ; The application is R running a local web application; the console window
 ; starts minimized and closes by itself when the application window is closed.
 Name: "{group}\{#AppName}"; Filename: "{app}\R\bin\x64\Rscript.exe"; \
-  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE, lang = '{code:AppLang}')"""; \
+  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE)"""; \
   WorkingDir: "{userdocs}"; IconFilename: "{app}\app.ico"; Flags: runminimized
 Name: "{autodesktop}\{#AppName}"; Filename: "{app}\R\bin\x64\Rscript.exe"; \
-  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE, lang = '{code:AppLang}')"""; \
+  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE)"""; \
   WorkingDir: "{userdocs}"; IconFilename: "{app}\app.ico"; Flags: runminimized; Tasks: desktopicon
 
 [Run]
 Filename: "{app}\R\bin\x64\Rscript.exe"; \
-  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE, lang = '{code:AppLang}')"""; \
+  Parameters: "--no-save --no-restore --no-init-file --no-environ -e ""mmgsemGUI::run_app(desktop = TRUE)"""; \
   WorkingDir: "{userdocs}"; Description: "{cm:LaunchProgram,{#AppName}}"; \
   Flags: nowait postinstall skipifsilent runminimized
-
-[Code]
-// The interface starts in the language chosen for the installation; it can be
-// switched inside the application at any time.
-function AppLang(Param: String): String;
-begin
-  if ActiveLanguage = 'turkish' then
-    Result := 'tr'
-  else
-    Result := 'en';
-end;

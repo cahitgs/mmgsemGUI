@@ -8,7 +8,6 @@ app_state$ever <- FALSE
 #' Opens the point-and-click interface. Everything runs on this computer; no
 #' data leave it.
 #'
-#' @param lang Interface language: `"en"` (English) or `"tr"` (Turkish).
 #' @param port Port to listen on. By default a free port is chosen.
 #' @param launch.browser Open the browser automatically?
 #' @param desktop Run as a desktop application: the interface opens in its own
@@ -18,11 +17,9 @@ app_state$ever <- FALSE
 #' @examples
 #' if (interactive()) run_app()
 #' @export
-run_app <- function(lang = getOption("mmgsemGUI.lang", "en"), port = NULL,
-                    launch.browser = TRUE, desktop = FALSE) {
+run_app <- function(port = NULL, launch.browser = TRUE, desktop = FALSE) {
   # Uploaded data files can be large (the default limit is 5 MB).
-  old <- options(mmgsemGUI.lang = pick_lang(lang), mmgsemGUI.desktop = isTRUE(desktop),
-                 shiny.maxRequestSize = 1024^3)
+  old <- options(mmgsemGUI.desktop = isTRUE(desktop), shiny.maxRequestSize = 1024^3)
   on.exit(options(old), add = TRUE)
   addResourcePath("mmgsemgui", system.file("app", "www", package = "mmgsemGUI"))
   if (isTRUE(desktop)) {
@@ -57,7 +54,7 @@ open_app_window <- function(url) {
 }
 
 # Desktop mode: stop R shortly after the last window is closed. The delay lets
-# a reload of the page (for example when switching language) reconnect.
+# a reload of the page reconnect.
 track_session <- function(session) {
   if (!isTRUE(getOption("mmgsemGUI.desktop"))) return(invisible(NULL))
   app_state$sessions <- app_state$sessions + 1L

@@ -21,9 +21,7 @@ work <- function(controls, stage, class = NULL) {
 }
 
 app_ui <- function(request) {
-  lang <- pick_lang(parseQueryString(request$QUERY_STRING)$lang)
-  L <- translator(lang)
-  other <- if (lang == "en") "tr" else "en"
+  L <- translator()
 
   ui_data <- step_page(
     "data", L("data_title"), L("data_lede"),
@@ -231,7 +229,10 @@ app_ui <- function(request) {
     )
   )
 
-  tagList(
+  # The page is the outermost element, so that its language reaches the <html> tag.
+  bootstrapPage(
+    theme = bslib::bs_theme(version = 5),
+    lang = "en",
     tags$head(
       tags$meta(charset = "utf-8"),
       tags$meta(name = "viewport", content = "width=device-width, initial-scale=1"),
@@ -241,31 +242,25 @@ app_ui <- function(request) {
       tags$link(rel = "stylesheet", href = "mmgsemgui/app.css"),
       tags$script(src = "mmgsemgui/app.js")
     ),
-    bootstrapPage(
-      theme = bslib::bs_theme(version = 5),
-      lang = lang,
+    tags$div(
+      class = "app",
+      tags$header(
+        class = "topbar",
+        tags$div(class = "brand",
+                 tags$span(class = "brand-name", "mmgsem GUI"),
+                 tags$span(class = "brand-sub", L("brand_sub"))),
+        tags$div(class = "topbar-right",
+                 uiOutput("job_badge", inline = TRUE),
+                 actionLink("about", L("about"), class = "toplink"))
+      ),
       tags$div(
-        class = "app",
-        tags$header(
-          class = "topbar",
-          tags$div(class = "brand",
-                   tags$span(class = "brand-name", "mmgsem GUI"),
-                   tags$span(class = "brand-sub", L("brand_sub"))),
-          tags$div(class = "topbar-right",
-                   uiOutput("job_badge", inline = TRUE),
-                   tags$a(class = "toplink", href = paste0("?lang=", other),
-                          title = L("lang_switch_title"), L("lang_switch")),
-                   actionLink("about", L("about"), class = "toplink"))
-        ),
-        tags$div(
-          class = "shell",
-          tags$nav(class = "rail", `aria-label` = L("steps"), uiOutput("rail")),
-          tags$main(
-            class = "main",
-            tabsetPanel(id = "step", type = "hidden", selected = "data",
-                        ui_data, ui_measure, ui_structure, ui_clusters, ui_results,
-                        ui_tests, ui_explain, ui_export)
-          )
+        class = "shell",
+        tags$nav(class = "rail", `aria-label` = L("steps"), uiOutput("rail")),
+        tags$main(
+          class = "main",
+          tabsetPanel(id = "step", type = "hidden", selected = "data",
+                      ui_data, ui_measure, ui_structure, ui_clusters, ui_results,
+                      ui_tests, ui_explain, ui_export)
         )
       )
     )

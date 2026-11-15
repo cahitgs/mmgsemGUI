@@ -14,7 +14,7 @@ reproduces every analysis.
 ```r
 install.packages("pak")
 pak::pak("cahitgs/mmgsemGUI/mmgsemGUI")   # also installs mmgsem at the tested version
-mmgsemGUI::run_app()                      # English; run_app(lang = "tr") for Turkish
+mmgsemGUI::run_app()
 ```
 
 From a copy of this repository, `pak::local_install("mmgsemGUI")` installs
