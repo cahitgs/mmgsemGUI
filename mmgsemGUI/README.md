@@ -190,8 +190,6 @@ it), and the two invariance checks are not available for ordinal items.
   best start stopped at the iteration limit is marked as not converged, a
   cluster without groups is reported, and warnings raised during estimation
   are shown with the solution they belong to.
-* Known limit: `mmgsem()` also stops when the log-likelihood decreases, and its
-  output does not say so; that case cannot be detected from outside.
 
 ## Not included yet
 
