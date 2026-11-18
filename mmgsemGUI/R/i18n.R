@@ -256,7 +256,7 @@ dict <- list(
   tests_title = "Hypothesis tests",
   tests_lede = "Standard errors turn the estimates into tests: is a relation different from zero, and does it differ between clusters?",
   se_title = "Standard errors",
-  se_intro = "They are computed numerically, which takes time. Start with the quick version and use the corrected one for your final report.",
+  se_intro = "They are computed numerically, which takes time. Start with the quick version; the tutorial recommends the corrected one for final results.",
   se_naive_btn = "Compute quick standard errors",
   se_naive_hint = "Ignores the uncertainty that comes from the measurement model. A minute or two for the tutorial example.",
   se_corr_btn = "Compute corrected standard errors",

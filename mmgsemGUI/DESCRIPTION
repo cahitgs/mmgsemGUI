@@ -1,6 +1,6 @@
 Package: mmgsemGUI
 Title: A Point-and-Click Interface for Mixture Multigroup Structural Equation Modeling
-Version: 0.1.0
+Version: 0.1.1
 Authors@R:
     person("Package", "Maintainer", role = c("aut", "cre"),
            email = "maintainer@example.org")
@@ -36,6 +36,6 @@ Suggests:
     readxl,
     testthat (>= 3.0.0)
 Remotes:
-    AndresFPA/mmgsem@758e845ced26393b7dd9d3627e61dd8a05a72428
+    AndresFPA/mmgsem@f3b2622783229e122b2cdc5d9bff3dd298e70e96
 Config/testthat/edition: 3
 Roxygen: list(markdown = TRUE)

@@ -59,11 +59,12 @@ clusters in separate R processes and assembles them into the object that
   tutorial, and each criterion selects the model reported there;
 * the coefficients and clusters equal Output Box 2, and the five-cluster
   solution of Appendix F equals Output Box 7;
-* computed from the `standard_errors` and `five_K_se` objects that ship with
-  mmgsem, the Wald statistics equal Output Box 5, the pairwise comparisons
-  equal Output Boxes 6 and 8, and the z tests equal the output of `summary()`;
-* the standard errors of the current mmgsem agree with lavaan's for the
-  equivalent multigroup path model (see below);
+* computed from the standard errors of the tutorial (`standard_errors_deprecated`
+  and `five_K_se` in mmgsem), the Wald statistics equal Output Box 5, the
+  pairwise comparisons equal Output Boxes 6 and 8, and the z tests equal the
+  output of `summary()`;
+* the uncorrected standard errors of the current mmgsem agree with lavaan's for
+  the equivalent multigroup path model (see below);
 * an analysis run through the interface functions equals `mmgsem` called
   directly;
 * the score tests behind "Screen the equal loadings" equal the univariate
@@ -84,13 +85,12 @@ Two deliberate differences from calling `lavaan::cfa()` with its defaults:
 
 ## Standard errors of the tutorial example
 
-The `standard_errors` object in mmgsem (the basis of Output Boxes 5 and 6 of
-the tutorial) was added in August 2025. `compute_se()` was revised in October
-2026 ("Fixed issues related to indexing of the parameter vector"), and what it
-returns now differs from the stored object, and from Output Box 4, for the
-regressions of F3 on F2:
+Output Boxes 4 to 6 of the tutorial were produced with `compute_se()` as it
+was in August 2025. The function was revised in October 2026 (mmgsem commit
+`8f4386e`, "Fixed issues related to indexing of the parameter vector"), and
+what it returns since then differs for the regressions of F3 on F2:
 
-| Cluster | Output Box 4 | Stored object | `compute_se()` now |
+| Cluster | Output Box 4 (uncorrected) | Corrected, earlier version | Corrected, revised version |
 |---|---|---|---|
 | 2 | 0.093 | 0.094 | 0.026 |
 | 3 | 0.039 | 0.039 | 0.027 |
@@ -98,32 +98,35 @@ regressions of F3 on F2:
 
 The other standard errors agree within 0.003, and no conclusion about a
 coefficient being different from zero changes. The Wald statistics become
-69.5, 104.6, 79.6 and 81.2 (Box 5: 64.7, 96.0, 48.8, 75.8).
+69.5, 104.6, 79.6 and 81.2 (Box 5: 64.7, 96.0, 48.8, 75.8), and 12 instead of
+11 of the 24 pairwise comparisons are significant after the Bonferroni
+correction (in Output Box 6, F3 ~ F2 between clusters 2 and 4 is not).
+
+Since 17 November 2026 mmgsem stores the values of the revised function as
+`standard_errors` and keeps the earlier ones as `standard_errors_deprecated`;
+`five_K_se`, for the five-cluster solution of Appendix F, is unchanged. The
+corrected standard errors that the interface offers for the example without
+waiting (`data-raw/tutorial_se.R`; 124 minutes on the development computer)
+are identical to the new `standard_errors`. For every other analysis the
+interface computes the standard errors with `compute_se()` itself.
 
 That the difference comes from the change in mmgsem, and not from this
 interface, was checked by replication: mmgsem as it was on 29 August 2025
 (commit `0df43d1`), run on the tutorial example, gives the standard errors
 printed in Output Box 4 for all sixteen coefficients (0.093 for F3 ~ F2 in
-cluster 2); the current version (commit `758e845`) gives 0.026 for that
-coefficient.
+cluster 2); the revised version gives 0.026 for that coefficient.
 
-Which values are right was checked without any code of mmgsem. With the groups
-assigned to their clusters, Step 2 is a multigroup path model on the factor
-covariance matrices of Step 1 in which the regressions are equal within a
-cluster. lavaan's analytic standard errors for that model agree with the
-current `compute_se(naive = TRUE)` within 0.001 for all sixteen coefficients
-(0.026 for F3 ~ F2 in cluster 2); the standard errors of Output Box 4 differ
-from them by up to 0.067. The example itself points the same way: it was
-generated with every regression equal to zero in one cluster and 0.3 in the
-other three, so twelve pairs of clusters truly differ. The pairwise tests find
-eleven of them with the stored object (Output Box 6 misses F3 ~ F2 between
-clusters 2 and 4) and all twelve, without a false alarm, with the current
-version. The change was made in mmgsem commit `8f4386e` (28 October 2026).
-
-The interface therefore does not offer the stored object. For the example it
-offers corrected standard errors computed with the bundled version of mmgsem
-(`data-raw/tutorial_se.R`; 124 minutes on the development computer), and it
-always computes standard errors with `compute_se()` itself.
+The uncorrected standard errors of the revised version were also compared
+with a computation that uses no code of mmgsem. With the groups assigned to
+their clusters, Step 2 is a multigroup path model on the factor covariance
+matrices of Step 1 in which the regressions are equal within a cluster.
+lavaan's analytic standard errors for that model agree with
+`compute_se(naive = TRUE)` within 0.001 for all sixteen coefficients (0.026
+for F3 ~ F2 in cluster 2); the standard errors of Output Box 4 differ from
+them by up to 0.067. This comparison says nothing about the correction for
+stepwise estimation, because the path model takes the factor covariance
+matrices as given. In the example the correction adds between 0.2% and 2.3%
+to the uncorrected standard errors.
 
 Confidence intervals can differ from those printed by `summary()` by 0.001:
 `summary()` computes them from the estimate rounded to three decimals, the
@@ -146,15 +149,18 @@ is intended, with the current version of mmgsem (the authors' script at
   now `x` and `object`. The exported script passes the object unnamed.
 * Appendix A assigns the fourth block to `S1_model.F3` a second time, so
   `S1_model.F4` does not exist.
-* Appendix B needs `ordered = TRUE` (with `group.equal` and `group.partial`) in
-  the call of `mmgsem()`; Table E1 lists this argument as `ordinal`.
+* Appendix B needs `ordered = TRUE` in the call of `mmgsem()` (the authors have
+  added this correction to their tutorial repository); Table E1 lists this
+  argument as `ordinal`.
 * Appendix D and Section 4.2.4 describe the measurement model that `mmgsem()`
   estimates itself as fully metric invariant. Without `group.equal = "loadings"`
   in the call it is a configural model: the loadings differ between groups.
   The interface always estimates the measurement model with equal loadings
   (except the released ones) and hands it to `mmgsem()`.
 * Output Box 4 shows uncorrected standard errors of the earlier version of
-  `compute_se()`; Output Boxes 5, 6 and 8 are based on the stored corrected ones.
+  `compute_se()`; Output Boxes 5, 6 and 8 are based on the corrected ones of
+  that version, which mmgsem keeps as `standard_errors_deprecated` (four
+  clusters) and `five_K_se` (five clusters).
 
 ## Ways to estimate the measurement model
 
@@ -168,9 +174,10 @@ of the tutorial are available in the measurement-model step:
   multigroup CFA; `mmgsem()` receives the list of models and fits.
 * **Ordinal items** (Appendix B). Categorical CFA with the Wu and Estabrook
   (2016) identification, thresholds and loadings equal across groups. `mmgsem()`
-  is called with `ordered = TRUE` and the same constraints; only then does it
-  use polychoric correlations and rescale the factors to the marker-variable
-  scale. The result equals letting `mmgsem()` estimate Step 1 itself (tested).
+  is called with `ordered = TRUE` (and the same constraints); without
+  `ordered = TRUE` it neither uses polychoric correlations nor rescales the
+  factors to the marker-variable scale. The result equals letting `mmgsem()`
+  estimate Step 1 itself (tested).
 
 Ordinal items cannot be combined with the other two (mmgsem does not support
 it), and the two invariance checks are not available for ordinal items.
@@ -208,5 +215,5 @@ is closed.
 ## Versions
 
 Developed and tested with R 4.6.1, lavaan 0.7-2 and mmgsem 0.0.1 (GitHub commit
-`758e845`). `mmgsem` is under development; if its interface changes, the tests
+`f3b2622`). `mmgsem` is under development; if its interface changes, the tests
 above show where.

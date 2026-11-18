@@ -9,6 +9,15 @@ fx <- readRDS(test_path("fixtures", "tutorial_models.rds"))
 ms <- assemble_selection(unname(fx$models))
 fit4 <- mmgsem::extract(ms, 4)
 
+# The standard errors behind Output Boxes 5 and 6. mmgsem stored them as
+# `standard_errors` until November 2026 and keeps them as
+# `standard_errors_deprecated` since; `standard_errors` now holds the values
+# of the revised compute_se().
+se_renamed <- "standard_errors_deprecated" %in% utils::data(package = "mmgsem")$results[, "Item"]
+tutorial_se <- function() {
+  if (se_renamed) getExportedValue("mmgsem", "standard_errors_deprecated") else mmgsem::standard_errors
+}
+
 test_that("the model-selection table equals ModelSelection() and Output Box 1", {
   expect_equal(ms$Overview, fx$overview, ignore_attr = TRUE)
   ov <- ms$Overview
@@ -55,8 +64,8 @@ test_that("random-start diagnostics count the starts at the best solution", {
   expect_lt(d3$n_best, d3$n_starts)
 })
 
-test_that("tests computed from the package's standard errors equal its own output", {
-  se <- mmgsem::standard_errors
+test_that("tests computed from the standard errors of the tutorial equal its output boxes", {
+  se <- tutorial_se()
   expect_true(mmgsemGUI:::se_matches_fit(se, fit4))
   b <- tidy_betas(fit4, se)
   expect_identical(attr(b, "se_type"), "corrected")
@@ -77,12 +86,12 @@ test_that("tests computed from the package's standard errors equal its own outpu
 })
 
 test_that("standard errors of another solution are not attached to this one", {
-  expect_false(mmgsemGUI:::se_matches_fit(mmgsem::standard_errors, mmgsem::extract(ms, 3)))
+  expect_false(mmgsemGUI:::se_matches_fit(tutorial_se(), mmgsem::extract(ms, 3)))
 })
 
 test_that("the figures can be drawn", {
   regs <- list(F3 = c("F1", "F2"), F4 = c("F1", "F3"))
-  b <- tidy_betas(fit4, mmgsem::standard_errors)
+  b <- tidy_betas(fit4, tutorial_se())
   plots <- list(
     plot_paths(regs, paste0("F", 1:4)),
     plot_paths(regs, paste0("F", 1:4), betas = b, sizes = table(tidy_clusters(fit4)$cluster)),
@@ -99,11 +108,12 @@ test_that("the figures can be drawn", {
   }
 })
 
-test_that("the standard errors of the current mmgsem agree with lavaan, those of Output Box 4 do not", {
+test_that("the uncorrected standard errors of the current mmgsem agree with lavaan, those of Output Box 4 do not", {
   # With the groups assigned to their clusters, Step 2 is a multigroup path
   # model on the factor covariance matrices of Step 1 in which the regressions
   # are equal within a cluster. lavaan's analytic standard errors for that model
-  # use no code of mmgsem, so they show which standard errors are right.
+  # use no code of mmgsem. They are a check of the uncorrected standard errors
+  # only: the model takes the factor covariance matrices as given.
   cl <- tidy_clusters(fit4)$cluster
   lab <- function(name) paste0("c(", paste0(name, "_k", cl, collapse = ", "), ") * ")
   model <- paste0("F4 ~ ", lab("b41"), "F1 + ", lab("b43"), "F3\n",
@@ -124,7 +134,10 @@ test_that("the standard errors of the current mmgsem agree with lavaan, those of
   box4 <- c(0.031, 0.027, 0.028, 0.025, 0.031, 0.032, 0.093, 0.029,
             0.027, 0.032, 0.039, 0.032, 0.028, 0.026, 0.035, 0.025)
   expect_gt(max(abs(box4 - ref)), 0.05)
-  # the correction for stepwise estimation can only add uncertainty
+  # What compute_se() returns with the correction for stepwise estimation: for
+  # this example 0.2% to 2.3% above the uncorrected values. This records the
+  # output of the package, so that a change in it is noticed; it is not a check
+  # that the size of the correction is right.
   corrected <- mmgsemGUI:::precomputed_se()$se$SE_vector$betas_se_corrected
   expect_true(all(corrected >= now))
   expect_lt(max(corrected / now), 1.03)
@@ -141,8 +154,9 @@ test_that("the pairwise tests find the differences the example was generated wit
   }
   pw <- tidy_pairwise(fit4, mmgsemGUI:::precomputed_se()$se)
   expect_identical(pw$significant, truly(pw))
-  # with the object stored in mmgsem (Output Box 6) one of the twelve is missed
-  old <- tidy_pairwise(fit4, mmgsem::standard_errors)
+  # with the standard errors of the tutorial (Output Box 6) one of these twelve
+  # comparisons is not significant
+  old <- tidy_pairwise(fit4, tutorial_se())
   expect_equal(sum(old$significant), 11)
   expect_equal(sum(truly(old) & !old$significant), 1)
 })
@@ -173,12 +187,14 @@ test_that("the precomputed standard errors that ship with the interface belong t
   b <- tidy_betas(fit4, pre$se)
   expect_identical(attr(b, "se_type"), "corrected")
   expect_true(all(b$se > 0.02 & b$se < 0.04))
-  # computed with the current compute_se(): they differ from the object stored
-  # in mmgsem for the regressions of F3 on F2, and agree elsewhere
-  old <- unname(mmgsem::standard_errors$SE_vector$betas_se_corrected)
+  # computed with the revised compute_se(): they differ from the standard errors
+  # of the tutorial for the regressions of F3 on F2, and agree elsewhere
+  old <- unname(tutorial_se()$SE_vector$betas_se_corrected)
   f3f2 <- b$parameter == "F3 ~ F2" & b$cluster > 1
   expect_true(all(abs(b$se[!f3f2] - old[!f3f2]) < 0.003))
   expect_true(all(old[f3f2] - b$se[f3f2] > 0.005))
   w <- tidy_wald(fit4, pre$se)
   expect_equal(round(w$wald, 1), c(69.5, 104.6, 79.6, 81.2))
+  # since November 2026 mmgsem stores these values itself
+  if (se_renamed) expect_equal(mmgsem::standard_errors$vcov_betas, pre$se$vcov_betas, tolerance = 1e-10)
 })

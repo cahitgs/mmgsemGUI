@@ -6,10 +6,12 @@
 # It follows the tutorial script of Perez Alonso et al. (2026) and takes well
 # over an hour.
 #
-# These values replace the `standard_errors` object of the mmgsem package in
-# the interface. That object was added to mmgsem in August 2025; compute_se()
-# was corrected in October 2026 ("Fixed issues related to indexing of the
-# parameter vector"), so the stored object no longer agrees with the function.
+# compute_se() was revised in October 2026 ("Fixed issues related to indexing
+# of the parameter vector"), so the object that mmgsem stored for the tutorial
+# since August 2025 no longer agreed with the function. Since 17 November 2026
+# mmgsem stores the values of the revised function as `standard_errors`; they
+# are identical to the ones computed here. The earlier values are kept in
+# mmgsem as `standard_errors_deprecated`.
 
 library(mmgsem)
 library(lavaan)

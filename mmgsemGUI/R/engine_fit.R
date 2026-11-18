@@ -167,9 +167,10 @@ standard_errors <- function(fit, naive = TRUE) {
 #'
 #' Computed with [mmgsem::compute_se()] for the four-cluster model of the
 #' tutorial example (seed 1, 20 random starts) by `data-raw/tutorial_se.R`.
-#' They are not the `standard_errors` object that ships with mmgsem: that
-#' object predates a correction of `compute_se()` (October 2026) and no longer
-#' agrees with what the function returns.
+#' `compute_se()` was revised in October 2026. Since 17 November 2026 mmgsem
+#' stores the values of the revised function as `standard_errors`, which are
+#' identical to these, and keeps the values behind the output boxes of the
+#' tutorial as `standard_errors_deprecated`.
 #' @return A list with `se`, `mmgsem` (version and commit used) and `seconds`,
 #'   or NULL when the file is not installed.
 #' @keywords internal
